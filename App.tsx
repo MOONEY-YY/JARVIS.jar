@@ -48,7 +48,6 @@ interface GeneratedScenario {
 }
 
 // --- UNIVERSAL SCENARIO FACTORY (The Engine) ---
-// This engine procedurally generates chart patterns based on configuration
 const useScenarioFactory = (course: Course): GeneratedScenario => {
   return useMemo(() => {
     const type = course.demoType;
@@ -105,7 +104,6 @@ const useScenarioFactory = (course: Course): GeneratedScenario => {
         }
     };
 
-    // Helper to add phases based on data length snapshots
     const createPhase = (startIdx: number, text: string) => {
         phases.push({ start: startIdx, end: data.length, text });
         return data.length;
@@ -164,7 +162,7 @@ const useScenarioFactory = (course: Course): GeneratedScenario => {
              addTrend(15, -1); const low2 = price; cursor = createPhase(cursor, '二次探底');
              
              addCandle({move: 200, vol: 2000}); // Breakout
-             triggerIdx = data.length - 1; // Mark breakout as trigger
+             triggerIdx = data.length - 1; 
              
              addTrend(15, 1); cursor = createPhase(cursor, '突破颈线');
              meta.support = Math.min(low1, low2); meta.resistance = neck;
@@ -183,7 +181,7 @@ const useScenarioFactory = (course: Course): GeneratedScenario => {
              addTrend(15, 1); cursor = createPhase(cursor, '左肩形成');
              addTrend(10, -1); 
              addTrend(15, 1); addCandle({move:50}); // Head
-             triggerIdx = data.length - 1; // Head top
+             triggerIdx = data.length - 1; 
              addTrend(15, -1); cursor = createPhase(cursor, '头部冲高回落');
              addTrend(10, 1); cursor = createPhase(cursor, '右肩反弹无力');
              addTrend(10, -1); cursor = createPhase(cursor, '跌破颈线');
@@ -191,7 +189,7 @@ const useScenarioFactory = (course: Course): GeneratedScenario => {
         else if (cfg.complex === 'flag_bull') {
              addTrend(15, 1, 300); cursor = createPhase(cursor, '旗杆急涨');
              for(let i=0;i<12;i++) addCandle({move: -30}); // Flag
-             triggerIdx = data.length - 1; // Flag end
+             triggerIdx = data.length - 1;
              cursor = createPhase(cursor, '旗面缩量整理');
              addCandle({move: 300, vol: 2000}); 
              addTrend(15, 1); cursor = createPhase(cursor, '放量突破');
@@ -260,7 +258,6 @@ const useScenarioFactory = (course: Course): GeneratedScenario => {
 
     // Generate Annotation
     if (triggerIdx > 0) {
-        // Determine position based on setup/result. 
         // If it's a top pattern (Setup Up -> Result Down), label on top.
         // If it's a bottom pattern (Setup Down -> Result Up), label on bottom.
         const isTop = cfg.setup === 'up' || cfg.result === 'down' || cfg.complex === 'm' || cfg.complex === 'hs';
@@ -274,36 +271,34 @@ const useScenarioFactory = (course: Course): GeneratedScenario => {
     }
 
     return { data, phases, meta, annotations, trendArrow };
-  }, [course.id, course.demoType]); // Re-run if course changes
+  }, [course.id, course.demoType]);
 };
 
 // --- Custom Chart Components ---
 
 const AnnotationShape = (props: any) => {
-    const { cx, cy, payload } = props; // ReferenceDot passes cx, cy
-    const { text, position } = payload; // We pass our custom data as payload props to ReferenceDot? 
-    // Actually ReferenceDot renders what we pass in `shape`.
-    // We need to pass the annotation object to the shape function.
+    const { cx, cy, payload } = props; 
+    const { text, position } = payload;
     
     if(!cx || !cy) return null;
 
     const offset = 40;
     const isTop = position === 'top';
-    const textY = isTop ? cy - offset : cy + offset + 10;
-    const lineY1 = isTop ? cy - offset + 5 : cy + offset - 15;
-    const lineY2 = isTop ? cy - 10 : cy + 10;
+    const textY = isTop ? cy - offset : cy + offset + 15;
+    const lineY1 = isTop ? cy - offset + 8 : cy + offset - 12;
+    const lineY2 = isTop ? cy - 12 : cy + 12;
 
     return (
-        <g className="animate-in fade-in zoom-in duration-500">
+        <g className="animate-in fade-in zoom-in duration-500 origin-center">
             <text 
                 x={cx} 
                 y={textY} 
                 fill="#fff" 
                 textAnchor="middle" 
-                fontWeight="bold" 
-                fontSize="14"
-                className="font-orbitron"
-                style={{textShadow: '0 2px 4px rgba(0,0,0,0.8)'}}
+                fontWeight="900" 
+                fontSize="16"
+                className="font-orbitron tracking-wider"
+                style={{textShadow: '0 2px 8px rgba(0,0,0,1)'}}
             >
                 {text}
             </text>
@@ -316,8 +311,8 @@ const AnnotationShape = (props: any) => {
             {/* Arrow Head */}
             <path 
                 d={isTop 
-                    ? `M${cx-4},${lineY2-5} L${cx},${lineY2} L${cx+4},${lineY2-5}`
-                    : `M${cx-4},${lineY2+5} L${cx},${lineY2} L${cx+4},${lineY2+5}`
+                    ? `M${cx-4},${lineY2-6} L${cx},${lineY2} L${cx+4},${lineY2-6}`
+                    : `M${cx-4},${lineY2+6} L${cx},${lineY2} L${cx+4},${lineY2+6}`
                 }
                 stroke="#fff"
                 strokeWidth="2"
@@ -466,8 +461,8 @@ const ChartWidget = ({ course }: { course: Course }) => {
                         <ReferenceLine 
                             segment={[{ x: trendArrow.x1, y: trendArrow.y1 }, { x: trendArrow.x2, y: trendArrow.y2 }]} 
                             stroke="#F6465D" 
-                            strokeWidth={4}
-                            strokeOpacity={0.6}
+                            strokeWidth={5}
+                            strokeOpacity={0.8}
                             ifOverflow="extendDomain"
                             markerEnd="url(#trendArrowHead)"
                         />
@@ -487,7 +482,7 @@ const ChartWidget = ({ course }: { course: Course }) => {
 
                     <defs>
                         <marker id="trendArrowHead" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#F6465D" fillOpacity={0.6} />
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#F6465D" fillOpacity={0.8} />
                         </marker>
                     </defs>
 
@@ -503,8 +498,9 @@ const ChartWidget = ({ course }: { course: Course }) => {
             
             {/* Visual indicator for paused state */}
             {pausedForAnnotation && (
-                <div className="absolute bottom-4 right-14 bg-[#1877F2] text-white text-[10px] px-2 py-1 rounded animate-pulse">
-                    TEACHING...
+                <div className="absolute bottom-4 right-14 bg-[#1877F2] text-white font-bold text-[10px] px-3 py-1.5 rounded-full animate-pulse flex items-center gap-2 shadow-[0_0_15px_rgba(24,119,242,0.5)]">
+                    <Sparkles className="w-3 h-3" />
+                    AI ANALYSIS: PAUSED
                 </div>
             )}
         </div>
